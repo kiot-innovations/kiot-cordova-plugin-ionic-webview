@@ -269,6 +269,12 @@
     WKWebView* wkWebView = [[WKWebView alloc] initWithFrame:self.frame configuration:configuration];
 
     [wkWebView.scrollView setContentInsetAdjustmentBehavior:UIScrollViewContentInsetAdjustmentNever];
+    // BOOL allowWebviewInspectionDefault = YES;
+    // if (@available(iOS 16.4, *)) {
+    //     wkWebView.inspectable = [settings cordovaBoolSettingForKey:@"InspectableWebview" defaultValue:allowWebviewInspectionDefault];
+    // } else {
+    //     // Fallback on earlier versions
+    // }
 
     wkWebView.UIDelegate = self.uiDelegate;
     self.engineWebView = wkWebView;
@@ -299,20 +305,7 @@
     if ([settings cordovaBoolSettingForKey:@"KeyboardAppearanceDark" defaultValue:NO]) {
         [self setKeyboardAppearanceDark];
     }
-    
-    #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160400
-        // With the introduction of iOS 16.4 the webview is no longer inspectable by default.
-        // We'll honor that change for release builds, but will still allow inspection on debug builds by default.
-        // We also introduce an override option, so consumers can influence this decision in their own build.
-        if (@available(iOS 16.4, *)) {
-    #ifdef DEBUG
-            BOOL allowWebviewInspectionDefault = YES;
-    #else
-            BOOL allowWebviewInspectionDefault = NO;
-    #endif
-            wkWebView.inspectable = [settings cordovaBoolSettingForKey:@"InspectableWebview" defaultValue:allowWebviewInspectionDefault];
-        }
-    #endif
+
     [self updateSettings:settings];
 
     // check if content thread has died on resume
@@ -388,9 +381,11 @@
 
 
 - (void)onAppWillEnterForeground:(NSNotification *)notification {
-    if ([self shouldReloadWebView]) {
+    if ([self shouldReloadWebView]) {  
         NSLog(@"%@", @"CDVWKWebViewEngine reloading!");
-        [(WKWebView*)_engineWebView reload];
+        NSString *baseRoute = self.CDV_LOCAL_SERVER;
+        NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:baseRoute]];   
+        [(WKWebView*)_engineWebView loadRequest:request]; 
     }
 }
 
