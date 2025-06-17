@@ -427,8 +427,8 @@
     NSLog(@"CDVWKWebViewEngine shouldReloadWebView location: %@", [location absoluteString]);
     NSLog(@"CDVWKWebViewEngine shouldReloadWebView reload: %u", reload);
 #endif
-
-    return reload;
+      return false;
+    //return reload;
 }
 
 
